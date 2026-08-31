@@ -87,6 +87,7 @@
               pkgs.gotools
               pkgs.go-tools
               pkgs.goreleaser
+              pkgs.ripgrep
             ];
             shellHook = ''
               export GOTOOLCHAIN=local
