@@ -1,23 +1,58 @@
 version: 2
+project_name: example
+env:
+  - CGO_ENABLED=0
+
+before:
+  hooks:
+    - ./hack/generate.sh --check
 
 builds:
   - id: example
-    main: ./cmd/example
+    main: ./cmd/main
     binary: example
-    env:
-      - CGO_ENABLED=0
     goos: [darwin, linux]
     goarch: [amd64, arm64]
     ldflags:
       - -s -w -X main.version={{.Version}}
 
 archives:
-  - formats: [tar.gz]
+  - id: example
+    ids: [example]
+    formats: [tar.gz]
     name_template: >-
       {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    files:
+      - LICENSE
+      - README.md
+      - src: completions/*
+        dst: completions
 
 checksum:
   name_template: checksums.txt
 
 changelog:
   use: github-native
+
+homebrew_casks:
+  - name: example
+    ids: [example]
+    binaries: [example]
+    homepage: https://github.com/roshbhatia/go-cli-template
+    description: Example composable Go CLI
+    license: MIT
+    completions:
+      bash: completions/example.bash
+      zsh: completions/_example
+      fish: completions/example.fish
+    hooks:
+      post:
+        install: |
+          system_command "/bin/mkdir", args: ["-p", "#{HOMEBREW_PREFIX}/share/nushell/vendor/autoload"]
+          system_command "/bin/cp", args: ["#{staged_path}/completions/example.nu", "#{HOMEBREW_PREFIX}/share/nushell/vendor/autoload/example.nu"]
+        uninstall: |
+          system_command "/bin/rm", args: ["-f", "#{HOMEBREW_PREFIX}/share/nushell/vendor/autoload/example.nu"]
+    repository:
+      owner: roshbhatia
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
