@@ -63,7 +63,7 @@
             checkPhase = ''
               runHook preCheck
               go test -race ./...
-              ./hack/generate.sh --check
+              ${pkgs.bash}/bin/bash ./hack/generate.sh --check
               bash -n completions/example.bash
               fish --no-config -n completions/example.fish
               nu --no-config-file --no-std-lib -c 'source completions/example.nu'
